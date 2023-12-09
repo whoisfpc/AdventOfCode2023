@@ -5,13 +5,14 @@ import "core:os"
 import "core:strings"
 import "core:strconv"
 import "core:slice"
+import "core:math"
 
 
 main :: proc() {
-    part1()
+    part1and2()
 }
 
-part1 :: proc() {
+part1and2 :: proc() {
     data, ok := os.read_entire_file_from_filename("inputs/day04.txt")
     if !ok {
         return
@@ -22,11 +23,21 @@ part1 :: proc() {
     have_nums := make([dynamic]int)
     defer delete(win_nums)
     defer delete(have_nums)
-
+    
     total := 0
     it := string(data)
+    line_count := strings.count(it, "\n") + 1
+    cards := make([dynamic]int, 0, line_count)
+    for i in 0..<line_count {
+        append(&cards, 1)
+    }
+
+    defer delete(cards)
+
+    idx := 0
     for line in strings.split_lines_iterator(&it) {
         points := 0
+        matchs := 0
         clear(&win_nums)
         clear(&have_nums)
         colon_idx := strings.index_rune(line, ':')
@@ -45,10 +56,18 @@ part1 :: proc() {
                 append(&have_nums, n)
                 if slice.contains(win_nums[:], n) {
                    points = 1 if points == 0 else points * 2
+                   matchs += 1
                 }
             }
         }
+        if matchs > 0 {
+            for i in idx+1..=idx+matchs {
+                if i < line_count do cards[i] += cards[idx]
+            }
+        }
         total += points
+        idx += 1
     }
     fmt.println(total)
+    fmt.println(math.sum(cards[:]))
 }
