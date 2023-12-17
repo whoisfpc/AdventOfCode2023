@@ -109,33 +109,33 @@ calc_arrangement :: proc(chars: []rune, nums: []int) -> int {
         delete(dp)
     }
 
-    for i in 0..<n {
+    for j in 0..<m {
+        v := check_damage(chars[0:j+1], nums[0])
+        dp[0][j] = v
+    }
+
+    for i in 1..<n {
         d := nums[i]
         for j in 0..<m {
             dp[i][j] = 0
             if j < d - 1 {
                 // do nothing
-            } else {
-                if i == 0 {
-                    v := check_damage(chars[0:j+1], d)
-                    dp[i][j] = v
-                } else {
-                    k_init := j - d - 1
-                    for k := j; k >= 0; k -= 1 {
-                        if k > k_init {
-                            if k > j-d {
-                                if chars[k] != '#' && chars[k] != '?' {
-                                    break
-                                }
-                            } else if chars[k] != '.' && chars[k] != '?' {
-                                break
-                            }
-                        } else {
-                            dp[i][j] += dp[i-1][k]
-                            if chars[k] != '.' && chars[k] != '?' {
-                                break
-                            }
+                continue
+            } 
+            k_init := j - d - 1
+            for k := j; k >= 0; k -= 1 {
+                if k > k_init {
+                    if k > j-d {
+                        if chars[k] != '#' && chars[k] != '?' {
+                            break
                         }
+                    } else if chars[k] != '.' && chars[k] != '?' {
+                        break
+                    }
+                } else {
+                    dp[i][j] += dp[i-1][k]
+                    if chars[k] != '.' && chars[k] != '?' {
+                        break
                     }
                 }
             }
