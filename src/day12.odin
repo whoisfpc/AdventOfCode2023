@@ -120,13 +120,22 @@ calc_arrangement :: proc(chars: []rune, nums: []int) -> int {
                     v := check_damage(chars[0:j+1], d)
                     dp[i][j] = v
                 } else {
-                    // i = 1, j = 2, d = 2
-                    // k = 2 - 2 - 1
-                    //v := check_damage(chars[j-d+1:d])
-                    // TODO: optimize
-                    for k := j - d - 1; k >= 0; k -= 1 {
-                        v := check_damage(chars[k+1:j+1], d)
-                        dp[i][j] += dp[i-1][k] * v
+                    k_init := j - d - 1
+                    for k := j; k >= 0; k -= 1 {
+                        if k > k_init {
+                            if k > j-d {
+                                if chars[k] != '#' && chars[k] != '?' {
+                                    break
+                                }
+                            } else if chars[k] != '.' && chars[k] != '?' {
+                                break
+                            }
+                        } else {
+                            dp[i][j] += dp[i-1][k]
+                            if chars[k] != '.' && chars[k] != '?' {
+                                break
+                            }
+                        }
                     }
                 }
             }
