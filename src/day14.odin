@@ -20,22 +20,56 @@ part1 :: proc() {
     lines := strings.split_lines(string(data))
     defer delete(lines)
 
-    stops := make([dynamic]int, len(lines[0]))
-    defer delete(stops)
+    rocks := make([dynamic][dynamic]rune)
+    defer {
+        for p in rocks do delete(p)
+        delete(rocks)
+    }
 
-    n := len(lines)
-    total := 0
-    
     for line, i in lines {
+        p := make([dynamic]rune)
         for c, j in line {
-            if c == '#' {
-                stops[j] = i + 1
-            } else if c == 'O' {
-                total += n - stops[j]
-                stops[j] += 1
+            append(&p, c)
+        }
+        append(&rocks, p)
+    }
+
+    tile_north(rocks)
+    
+    total := calc_load(rocks)
+    fmt.println(total)
+}
+
+calc_load :: proc(rocks: [dynamic][dynamic]rune) -> int {
+    total := 0
+    n := len(rocks)
+    
+    for line, i in rocks {
+        for c, j in line {
+            if c == 'O' {
+                total += n - i
             }
         }
     }
 
-    fmt.println(total)
+    return total
+}
+
+tile_north :: proc(rocks: [dynamic][dynamic]rune) {
+    stops := make([dynamic]int, len(rocks[0]))
+    defer delete(stops)
+
+    for line, i in rocks {
+        for c, j in line {
+            if c == '#' {
+                stops[j] = i + 1
+            } else if c == 'O' {
+                if stops[j] != i {
+                    rocks[stops[j]][j] = 'O'
+                    rocks[i][j] = '.'
+                }
+                stops[j] += 1
+            }
+        }
+    }
 }
