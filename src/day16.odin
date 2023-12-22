@@ -30,7 +30,7 @@ Beam :: struct {
 
 
 main :: proc() {
-    part1()
+    part2()
 }
 
 part1 :: proc() {
@@ -62,6 +62,7 @@ part1 :: proc() {
         append(&flags, flags_line)
     }
 
+    
     beam := Beam{0,0,.Right}
     run_beam(grid, flags, beam)
 
@@ -73,6 +74,84 @@ part1 :: proc() {
     }
 
     fmt.println(total)
+}
+
+part2 :: proc() {
+    data, ok := os.read_entire_file_from_filename("inputs/day16.txt")
+    if !ok {
+        return
+    }
+    defer delete(data)
+    it := string(data)
+
+    grid : [dynamic][dynamic]rune
+    flags : [dynamic][dynamic]Dir_Set
+    defer {
+        for g in grid do delete(g)
+        delete(grid)
+        for f in flags do delete(f)
+        delete(flags)
+    }
+    
+    for line in strings.split_lines_iterator(&it) {
+        grid_line : [dynamic]rune
+        flags_line : [dynamic]Dir_Set
+        for c in line {
+            append(&grid_line, c)
+            x : Dir_Set
+            append(&flags_line, x)
+        }
+        append(&grid, grid_line)
+        append(&flags, flags_line)
+    }
+
+    max_total := 0
+    n := len(grid)
+    m := len(grid[0])
+    for j in 0..<m {
+        {
+            beam := Beam{0,j,.Down}
+            total := calc_energizes(grid, flags, beam)
+            max_total = max(max_total, total)
+        }
+        {
+            beam := Beam{n-1,j,.Up}
+            total := calc_energizes(grid, flags, beam)
+            max_total = max(max_total, total)
+        }
+    }
+
+    for i in 0..<n {
+        {
+            beam := Beam{i,0,.Right}
+            total := calc_energizes(grid, flags, beam)
+            max_total = max(max_total, total)
+        }
+        {
+            beam := Beam{i,m-1,.Left}
+            total := calc_energizes(grid, flags, beam)
+            max_total = max(max_total, total)
+        }
+    }
+
+    fmt.println(max_total)
+}
+
+calc_energizes :: proc(grid: [dynamic][dynamic]rune, flags : [dynamic][dynamic]Dir_Set, beam: Beam) -> int {
+    for fl in flags {
+        for _, i in fl {
+            fl[i] = {}
+        }
+    }
+
+    run_beam(grid, flags, beam)
+    total := 0
+    for line in flags {
+        for f in line {
+            if card(f) > 0 do total += 1
+        }
+    }
+    return total
 }
 
 run_beam :: proc(grid: [dynamic][dynamic]rune, flags : [dynamic][dynamic]Dir_Set, beam: Beam) {
