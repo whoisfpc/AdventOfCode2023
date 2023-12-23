@@ -35,10 +35,10 @@ DNode :: struct {
 }
 
 main :: proc() {
-    part1()
+    part1and2()
 }
 
-part1 :: proc() {
+part1and2 :: proc() {
     data, ok := os.read_entire_file_from_filename("inputs/day17.txt")
     if !ok {
         return
@@ -60,10 +60,11 @@ part1 :: proc() {
         append(&heat_loss_map, p)
     }
 
-    find_dist(heat_loss_map)
+    find_dist(heat_loss_map, 0, 3)
+    find_dist(heat_loss_map, 3, 10)
 }
 
-find_dist :: proc(heat_loss_map : [dynamic][dynamic]int) {
+find_dist :: proc(heat_loss_map : [dynamic][dynamic]int, min_move, max_move: int) {
     n, m := len(heat_loss_map), len(heat_loss_map[0])
     dist : [Dir][dynamic][dynamic]int
     defer {
@@ -102,7 +103,7 @@ find_dist :: proc(heat_loss_map : [dynamic][dynamic]int) {
             continue
         }
 
-        for _ in 0..<3 {
+        for i in 0..<max_move {
             x += Dir_Vec[dir].x
             y += Dir_Vec[dir].y
 
@@ -111,6 +112,8 @@ find_dist :: proc(heat_loss_map : [dynamic][dynamic]int) {
             }
 
             cost += heat_loss_map[x][y]
+
+            if i < min_move do continue
 
             for new_dir in Dir_Turn[dir] {
                 if cost < dist[new_dir][x][y] {
