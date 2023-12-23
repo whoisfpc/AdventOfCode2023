@@ -15,8 +15,12 @@ Move_Dir := map[string]Pos {
 	"R" = {  0, +1 }, // right
 }
 
+Color_Dir := [4]string {
+    "R", "D", "L", "U"
+}
+
 main :: proc() {
-    part1()
+    part2()
 }
 
 part1 :: proc() {
@@ -41,6 +45,46 @@ part1 :: proc() {
         delta : [2]int = Move_Dir[cmds[0]]
 
         dist, _ := strconv.parse_int(cmds[1])
+        preimeter += dist
+        pos += delta * {dist, dist}
+
+        append(&points, pos)
+    }
+
+    // Pick's theorem: https://en.wikipedia.org/wiki/Pick%27s_theorem
+    // A = i + b / 2 - 1
+    // i = A - b / 2 + 1
+    // b + i = A + b / 2 + 1
+
+    total := area(points) + preimeter / 2 + 1
+    fmt.println(total)
+}
+
+part2 :: proc() {
+    data, ok := os.read_entire_file_from_filename("inputs/day18.txt")
+    if !ok {
+        return
+    }
+    defer delete(data)
+    it := string(data)
+
+    points: [dynamic]Pos
+    defer delete(points)
+    
+    preimeter := 0
+    pos := Pos{0, 0}
+    append(&points, pos)
+    
+    for line in strings.split_lines_iterator(&it) {
+        cmds := strings.split(line, " ")
+        defer delete(cmds)
+
+        
+        dist, _ := strconv.parse_int(cmds[2][2:7], 16)
+        color_int, _ := strconv.parse_int(cmds[2][7:8])
+        color_dir := Color_Dir[color_int]
+        
+        delta : [2]int = Move_Dir[color_dir]
         preimeter += dist
         pos += delta * {dist, dist}
 
